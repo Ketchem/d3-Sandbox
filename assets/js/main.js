@@ -76,7 +76,7 @@ window.onload = function(){
     var circles = container.selectAll(".circles") //create an empty selection
         .data(cityPop) //here we feed in an array
         .enter() //one of the great mysteries of the universe
-        .append("circle") //inspect the HTML--holy crap, there's some circles there
+        .append("circle") //inspect the HTML
         .attr("class", "circles")
         .attr("id", function(d){
             return d.city;
@@ -100,6 +100,7 @@ window.onload = function(){
             return color(d.population);
         })
         .style("stroke", "#000"); //black circle stroke
+   
     //Example 3.14 line 1...create circle labels
     var labels = container.selectAll(".labels")
         .data(cityPop)

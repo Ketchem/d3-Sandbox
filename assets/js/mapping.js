@@ -5,9 +5,9 @@ window.onload = setMap();
 function setMap(){
     //use d3.queue to parallelize asynchronous data loading
     d3.queue()
-        .defer(d3.csv, "../assets/data/unitsData.csv") //load attributes from csv
-        .defer(d3.json, "../assets/data/EuropeCountries.topojson") //load background spatial data
-        .defer(d3.json, "../assets/data/FranceProvinces.topojson") //load choropleth spatial data
+        .defer(d3.csv, "/assets/data/unitsData.csv") //load attributes from csv
+        .defer(d3.json, "/assets/data/EuropeCountries.topojson") //load background spatial data
+        .defer(d3.json, "/assets/data/FranceProvinces.topojson") //load choropleth spatial data
         .await(callback);
 
     function callback(error, csvData, europe, france){

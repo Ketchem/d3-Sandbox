@@ -13,7 +13,7 @@ function setMap(){
     function callback(error, csvData, europe, france){
         console.log(error);
         console.log(csvData);
-        console.log(europe);
-        console.log(france);
+        console.log(JSON.stringify(europe));
+        console.log(JSON.stringify(france));
     };
 };

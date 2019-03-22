@@ -11,7 +11,7 @@
     function setMap(){
 
         //map frame dimensions
-        var width = 960,
+        var width = window.innerWidth * 0.5,
             height = 460;
 
         //create new svg container for the map
@@ -36,7 +36,7 @@
         dataSets.push(d3.csv("assets/data/unitsData.csv"));
         dataSets.push(d3.json("assets/data/EuropeCountries.topojson"));
         dataSets.push(d3.json("assets/data/FranceRegions.topojson"));
-        // console.log(dataSets);
+        console.log(dataSets[0]);
 
         Promise.all(dataSets).then(function(values) {
             // place graticule on map
@@ -62,8 +62,10 @@
             //add enumeration units to the map
             setEnumerationUnits(franceRegions, map, path, colorScale);
 
-        });
-    };
+            setChart(csvData, colorScale);
+
+        }); // end of promise all
+    }; // end of setMap()
 
     function setGraticule(map, path){
         var graticule = d3.geoGraticule()
@@ -118,7 +120,7 @@
             })
             .attr("d", path)
             .style("fill", function(d){
-                return colorScale(d.properties[expressed]);
+                return choropleth(d.properties, colorScale);
             });
 
     };
@@ -150,6 +152,106 @@
         return colorScale;
     };
 
+    function choropleth(props, colorScale){
+        //make sure attribute value is a number
+        var val = parseFloat(props[expressed]);
+        //if attribute value exists, assign a color; otherwise assign gray
+        if (typeof val == 'number' && !isNaN(val)){
+            return colorScale(val);
+        } else {
+            return "#CCC";
+        };
+    };
+
+    function setChart(csvData, colorScale){
+        //chart frame dimensions
+        var chartWidth = window.innerWidth * 0.425,
+            chartHeight = 460;
+
+        //create a second svg element to hold the bar chart
+        var chart = d3.select("body")
+            .append("svg")
+            .attr("width", chartWidth)
+            .attr("height", chartHeight)
+            .attr("class", "chart");
+
+        var margin = {top: 10, right: 0, bottom: 10, left: 0}
+            , width = chart.attr("width") - margin.left - margin.right // Use the window's width
+            , height = chart.attr("height") - margin.top - margin.bottom; // Use the window's height
+
+        //create a scale to size bars proportionally to frame
+        var yScale = d3.scaleLinear()
+            .range([0, height])
+            .domain([0, 105]);
+
+        //Example 2.4 line 8...set bars for each province
+        var bars = chart.selectAll(".bars")
+            .data(csvData)
+            .enter()
+            .append("rect")
+            .sort(function(a, b){
+                return b[expressed]-a[expressed]
+            })
+            .attr("class", function(d){
+                return "bars " + d.adm1_code;
+            })
+            .attr("width", chartWidth / csvData.length - 1)
+            .attr("x", function(d, i){
+                return i * (chartWidth / csvData.length);
+            })
+            .attr("height", function(d){
+                return yScale(parseFloat(d[expressed]));
+            })
+            .attr("y", function(d){
+                return chartHeight - yScale(parseFloat(d[expressed]));
+            })
+            .style("fill", function(d){
+                return choropleth(d, colorScale);
+            });
+
+        //annotate bars with attribute value text
+        // var numbers = chart.selectAll(".numbers")
+        //     .data(csvData)
+        //     .enter()
+        //     .append("text")
+        //     .sort(function(a, b){
+        //         return b[expressed]-a[expressed]
+        //     })
+        //     .attr("class", function(d){
+        //         return "numbers " + d.adm1_code;
+        //     })
+        //     .attr("text-anchor", "middle")
+        //     .attr("x", function(d, i){
+        //         var fraction = chartWidth / csvData.length;
+        //         return i * fraction + (fraction - 1) / 2;
+        //     })
+        //     .attr("y", function(d){
+        //         return chartHeight - yScale(parseFloat(d[expressed])) + 15;
+        //     })
+        //     .text(function(d){
+        //         return d[expressed];
+        //     });
+
+        // Create a text element for the chart title
+        var chartTitle = chart.append("text")
+            .attr("x", 20)
+            .attr("y", 40)
+            .attr("class", "chartTitle")
+            .text("Number of Variable " + expressed[3] + " in each region");
+
+        //create vertical axis generator
+        var axis = chart.append("g")
+            .attr("class", "axis")
+            .call(d3.axisLeft(yScale)); // Create an axis component with d3.axisLeft
+
+
+        //create frame for chart border
+        // var chartFrame = chart.append("rect")
+        //     .attr("class", "chartFrame")
+        //     .attr("width", chartInnerWidth)
+        //     .attr("height", chartInnerHeight)
+        //     .attr("transform", translate);
+    };
 
 })();
 

@@ -165,8 +165,17 @@
 
     function setChart(csvData, colorScale){
         //chart frame dimensions
+        // var chartWidth = window.innerWidth * 0.425,
+        //     chartHeight = 460;
+
         var chartWidth = window.innerWidth * 0.425,
-            chartHeight = 460;
+            chartHeight = 473,
+            leftPadding = 25,
+            rightPadding = 2,
+            topBottomPadding = 5,
+            chartInnerWidth = chartWidth - leftPadding - rightPadding,
+            chartInnerHeight = chartHeight - topBottomPadding * 2,
+            translate = "translate(" + leftPadding + "," + topBottomPadding + ")";
 
         //create a second svg element to hold the bar chart
         var chart = d3.select("body")
@@ -175,14 +184,14 @@
             .attr("height", chartHeight)
             .attr("class", "chart");
 
-        var margin = {top: 10, right: 0, bottom: 10, left: 0}
-            , width = chart.attr("width") - margin.left - margin.right // Use the window's width
-            , height = chart.attr("height") - margin.top - margin.bottom; // Use the window's height
+        // var margin = {top: 10, right: 0, bottom: 10, left: 0}
+        //     , width = chart.attr("width") - margin.left - margin.right // Use the window's width
+        //     , height = chart.attr("height") - margin.top - margin.bottom; // Use the window's height
 
         //create a scale to size bars proportionally to frame
         var yScale = d3.scaleLinear()
-            .range([0, height])
-            .domain([0, 105]);
+            .range([463, 0])
+            .domain([0, 100]);
 
         //Example 2.4 line 8...set bars for each province
         var bars = chart.selectAll(".bars")
@@ -195,15 +204,15 @@
             .attr("class", function(d){
                 return "bars " + d.adm1_code;
             })
-            .attr("width", chartWidth / csvData.length - 1)
+            .attr("width", chartInnerWidth / csvData.length - 1)
             .attr("x", function(d, i){
-                return i * (chartWidth / csvData.length);
+                return i * (chartInnerWidth / csvData.length) + leftPadding;
             })
-            .attr("height", function(d){
-                return yScale(parseFloat(d[expressed]));
+            .attr("height", function(d, i){
+                return 463 - yScale(parseFloat(d[expressed]));
             })
-            .attr("y", function(d){
-                return chartHeight - yScale(parseFloat(d[expressed]));
+            .attr("y", function(d, i){
+                return yScale(parseFloat(d[expressed])) + topBottomPadding;
             })
             .style("fill", function(d){
                 return choropleth(d, colorScale);
@@ -234,7 +243,7 @@
 
         // Create a text element for the chart title
         var chartTitle = chart.append("text")
-            .attr("x", 20)
+            .attr("x", 40)
             .attr("y", 40)
             .attr("class", "chartTitle")
             .text("Number of Variable " + expressed[3] + " in each region");
@@ -242,15 +251,21 @@
         //create vertical axis generator
         var axis = chart.append("g")
             .attr("class", "axis")
+            .attr("transform", translate)
             .call(d3.axisLeft(yScale)); // Create an axis component with d3.axisLeft
 
 
+        // var axis = chart.append("g")
+        //     .attr("class", "axis")
+        //     .attr("transform", translate)
+        //     .call(yAxis);
+
         //create frame for chart border
-        // var chartFrame = chart.append("rect")
-        //     .attr("class", "chartFrame")
-        //     .attr("width", chartInnerWidth)
-        //     .attr("height", chartInnerHeight)
-        //     .attr("transform", translate);
+        var chartFrame = chart.append("rect")
+            .attr("class", "chartFrame")
+            .attr("width", chartInnerWidth)
+            .attr("height", chartInnerHeight)
+            .attr("transform", translate);
     };
 
 })();

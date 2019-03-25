@@ -233,7 +233,7 @@
 
         // Create a text element for the chart title
         var chartTitle = chart.append("text")
-            .attr("x", 40)
+            .attr("x", 250)
             .attr("y", 40)
             .attr("class", "chartTitle")
             .text("Number of Variable " + expressed[3] + " in each region");
